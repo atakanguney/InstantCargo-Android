@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#0b0494</color>
+    <color name="url_link_color">#0000ee</color>
+    <color name="button_gray">#454545</color>
+    <color name="tag_background">@color/secondaryColor</color>
 </resources>

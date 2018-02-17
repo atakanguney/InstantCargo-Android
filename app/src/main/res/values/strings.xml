@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">GetirAndroid</string>
+    <string name="app_name">Instant Cargo</string>
+    <string name="title_activity_maps">Instant Cargo</string>
+    <string name="lat_long_location">%1$f %2$f</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="action_settings">Settings</string>
+    <string name="search">Search</string>
 </resources>
