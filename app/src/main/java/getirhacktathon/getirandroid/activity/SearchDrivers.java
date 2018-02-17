@@ -1,8 +1,10 @@
-package getirhacktathon.getirandroid;
+package getirhacktathon.getirandroid.activity;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import getirhacktathon.getirandroid.R;
 
 public class SearchDrivers extends AppCompatActivity {
 

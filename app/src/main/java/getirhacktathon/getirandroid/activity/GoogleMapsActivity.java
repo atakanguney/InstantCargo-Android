@@ -1,4 +1,4 @@
-package getirhacktathon.getirandroid;
+package getirhacktathon.getirandroid.activity;
 
 
 import android.app.AlertDialog;
@@ -20,8 +20,6 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -34,7 +32,6 @@ import getirhacktathon.getirandroid.util.Utils;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataApi;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
@@ -93,6 +90,16 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
     private SearchView mSearchView;
     private Geocoder mGeoCoder;
 
+    public Intent getResultData() {
+        return resultData;
+    }
+
+    public void setResultData(Intent resultData) {
+        this.resultData = resultData;
+    }
+
+    private Intent resultData;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,6 +116,7 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
 
         mGeoCoder = new Geocoder(this);
+        resultData = new Intent();
 
         Toolbar toolbar = findViewById(R.id.google_maps_toolbar);
         setSupportActionBar(toolbar);
@@ -514,19 +522,92 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
     private void showMarkerInformation(Marker marker) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(marker.getTitle());
-        builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int which) -> {
-            Intent resultData = new Intent();
-            resultData.putExtra("LOCATION_NAME", marker.getTitle());
-            resultData.putExtra("LAT_LONG", marker.getPosition());
-            setResult(RESULT_OK, resultData);
-            finish();
+        builder.setMessage(marker.getSnippet());
+        builder.setPositiveButton("Destination", (DialogInterface dialog, int which) -> {
+            if (!resultData.hasExtra("SOURCE_LOCATION_NAME") && !resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
+                resultData.putExtra("DESTINATION_LOCATION_NAME", marker.getTitle());
+                resultData.putExtra("DESTINATION_LAT_LONG", marker.getPosition());
+            } else if (!resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
+                if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Destination cannot be source!!");
+                } else {
+                    resultData.putExtra("DESTINATION_LOCATION_NAME", marker.getTitle());
+                    resultData.putExtra("DESTINATION_LAT_LONG", marker.getPosition());
+                }
+            } else if (!resultData.hasExtra("SOURCE_LOCATION_NAME")) {
+                if (!resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Only one destination can be selected!!");
+                    marker.remove();
+                }
+            } else {
+                if (!resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle()) && !resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Only one destination can be selected!!");
+                    marker.remove();
+                } else if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Destination cannot be source!!");
+                }
+            }
         });
-        builder.setNegativeButton(R.string.cancel, null);
+        builder.setNeutralButton("Source", (DialogInterface dialog, int which) -> {
+            if (!resultData.hasExtra("SOURCE_LOCATION_NAME") && !resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
+                resultData.putExtra("SOURCE_LOCATION_NAME", marker.getTitle());
+                resultData.putExtra("SOURCE_LAT_LONG", marker.getPosition());
+            } else if (!resultData.hasExtra("SOURCE_LOCATION_NAME")) {
+                if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Source cannot be destination!!");
+                } else {
+                    resultData.putExtra("SOURCE_LOCATION_NAME", marker.getTitle());
+                    resultData.putExtra("SOURCE_LAT_LONG", marker.getPosition());
+                }
+            } else if (!resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
+                if (!resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Only one source can be selected!!");
+                    marker.remove();
+                }
+            } else {
+                if (!resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle()) && !resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Only one source can be selected!!");
+                    marker.remove();
+                } else if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    Utils.showToast(this, "Source cannot be destination!!");
+                }
+            }
+        });
+
+        builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int which) -> {
+            if (resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
+                if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    resultData.removeExtra("DESTINATION_LOCATION_NAME");
+                    resultData.removeExtra("DESTINATION_LAT_LONG");
+                }
+            } else if (resultData.hasExtra("SOURCE_LOCATION_NAME")) {
+                if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    resultData.removeExtra("SOURCE_LOCATION_NAME");
+                    resultData.removeExtra("SOURCE_LAT_LONG");
+                }
+            }
+            marker.remove();
+            return;
+        });
+
+        builder.setOnCancelListener((DialogInterface dialog) -> {
+            if (resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
+                if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    return;
+                }
+            } else if (resultData.hasExtra("SOURCE_LOCATION_NAME")) {
+                if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
+                    return;
+                }
+            }
+            marker.remove();
+            return;
+        });
         builder.create().show();
     }
 
     /*
-     * Request location permission, so that we can get the location of the
+     * RequestResponse location permission, so that we can get the location of the
      * device. The result of the permission request is handled by a callback,
      * onRequestPermissionsResult.
      */
@@ -542,5 +623,15 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+    }
+
+    public void makeRequest(View view) {
+        if (!resultData.hasExtra("DESTINATION_LOCATION_NAME") || !resultData.hasExtra("SOURCE_LOCATION_NAME")) {
+            Utils.showToast(this, "Destination and Source Must be selected!!");
+        } else {
+            setResult(RESULT_OK, resultData);
+            finish();
+        }
+
     }
 }

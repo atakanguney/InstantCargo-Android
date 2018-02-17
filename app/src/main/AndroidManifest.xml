@@ -31,7 +31,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,38 +39,38 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RequestCargo"
-            android:parentActivityName=".MainActivity">
+            android:name=".activity.RequestCargo"
+            android:parentActivityName=".activity.MainActivity">
 
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
         <activity
-            android:name=".DriveCargo"
-            android:parentActivityName=".MainActivity">
+            android:name=".activity.DriveCargo"
+            android:parentActivityName=".activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
         <activity
-            android:name=".SearchDrivers"
-            android:parentActivityName=".MainActivity">
+            android:name=".activity.SearchDrivers"
+            android:parentActivityName=".activity.MainActivity">
 
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
         <activity
-            android:name=".GoogleMapsActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".activity.GoogleMapsActivity"
+            android:parentActivityName=".activity.MainActivity">
 
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
     </application>
 

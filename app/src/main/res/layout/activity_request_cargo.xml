@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="getirhacktathon.getirandroid.RequestCargo">
+    tools:context="getirhacktathon.getirandroid.activity.RequestCargo">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,6 +35,7 @@
                 android:id="@+id/search_button"
                 android:layout_width="wrap_content"
                 android:layout_height="46dp"
+                android:scaleType="centerInside"
                 android:layout_weight="1"
                 android:onClick="searchPlace"
                 app:srcCompat="@drawable/ic_search_black_24dp" />

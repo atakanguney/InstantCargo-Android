@@ -14,7 +14,7 @@ public class Location {
     private double longitude;
 
     @SerializedName("latitude")
-    private double lattitude;
+    private double latitude;
 
     @SerializedName("distance")
     private double distance;
@@ -23,10 +23,10 @@ public class Location {
 
     }
 
-    public Location(String locationName, double longitude, double lattitude, double distance) {
+    public Location(String locationName, double longitude, double latitude, double distance) {
         this.locationName = locationName;
         this.longitude = longitude;
-        this.lattitude = lattitude;
+        this.latitude = latitude;
         this.distance = distance;
     }
 
@@ -55,11 +55,11 @@ public class Location {
         this.longitude = longitude;
     }
 
-    public double getLattitude() {
-        return lattitude;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setLattitude(double lattitude) {
-        this.lattitude = lattitude;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

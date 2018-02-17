@@ -3,7 +3,8 @@
     android:id="@+id/home_layout"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:weightSum="10">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/google_maps_toolbar"
@@ -11,6 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/white"
         android:elevation="4dp"
+        android:layout_weight="1"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -19,7 +21,16 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8"
         tools:context=".home.GoogleMapsActivity" />
+
+    <Button
+        android:id="@+id/make_request"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:onClick="makeRequest"
+        android:text="Make Request" />
 
 </LinearLayout>

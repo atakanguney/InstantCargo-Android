@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="getirhacktathon.getirandroid.DriveCargo">
+    tools:context="getirhacktathon.getirandroid.activity.DriveCargo">
 
     <TextView
         android:id="@+id/textView"
