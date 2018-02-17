@@ -30,6 +30,7 @@ import android.widget.TextView;
 import getirhacktathon.getirandroid.R;
 
 import getirhacktathon.getirandroid.remote.GoogleMapsLocationAsyncTask;
+import getirhacktathon.getirandroid.util.Utils;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -107,11 +108,11 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
 
-        //mGeoCoder = new Geocoder(this);
+        mGeoCoder = new Geocoder(this);
 
-        //Toolbar toolbar = findViewById(R.id.google_maps_toolbar);
-        //setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Toolbar toolbar = findViewById(R.id.google_maps_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
@@ -132,19 +133,16 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action_home bar if it is present.
-        //MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.menu.action_google_maps, menu);
+
+        getMenuInflater().inflate(R.menu.action_google_maps, menu);
 
         // Searchable configuration
-        //SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        //mSearchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        //mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        //setupSearchView();
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        setupSearchView();
 
-        //return super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
@@ -153,13 +151,13 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
      * @param item The menu item to handle.
      * @return Boolean.
      */
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.option_get_place) {
             showCurrentPlace();
         }
         return true;
-    }
+    }*/
 
 
     /**
@@ -213,13 +211,14 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onDataRetrieved(List<Address> resultList) {
         if (resultList == null) {
-            System.out.println("Connection Failure");
-            //Utils.showToast(this, getString(R.string.connection_failure));
+            //System.out.println("Connection Failure");
+            Utils.showToast(this, getString(R.string.connection_failure));
         } else if (resultList.isEmpty()) {
-            System.out.println("Unable to get location");
-            //Utils.showToast(this, getString(R.string.unable_get_location));
+            //System.out.println("Unable to get location");
+            Utils.showToast(this, getString(R.string.unable_get_location));
         } else {
             // show all the markers on the map
+
             mGoogleMap.clear();
             for (Address address : resultList) {
                 addMarker(address);
@@ -301,7 +300,7 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
         //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(39, 35), 4.5f));
 
-        /*// show information about location
+        // show information about location
         mGoogleMap.setOnMarkerClickListener((Marker marker) -> {
             showMarkerInformation(marker);
             return false;
@@ -315,7 +314,7 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
             Marker newMarker = addMarker(address);
             showMarkerInformation(newMarker);
-        });*/
+        });
     }
 
     /**
