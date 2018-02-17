@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/InstantCargo-Android.iml" filepath="$PROJECT_DIR$/InstantCargo-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/getirAndroid.iml" filepath="$PROJECT_DIR$/getirAndroid.iml" />
     </modules>
   </component>
 </project>

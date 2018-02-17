@@ -6,40 +6,38 @@
     android:layout_height="match_parent"
     tools:context="getirhacktathon.getirandroid.MainActivity">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:layout_height="626dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="8dp">
 
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/requestButton"
             style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/button3"
-            android:layout_centerHorizontal="true"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:onClick="requestCargo"
+            android:text="Request Cargo" />
+
+        <Button
+            android:id="@+id/driveButton"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:onClick="driveCargo"
+            android:text="Drive Cargo" />
+
+        <Button
+            android:id="@+id/searchButton"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:onClick="searchDrivers"
             android:text="Search Drivers" />
 
-        <Button
-            android:id="@+id/button3"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:onClick="requestCargo"
-            android:text="Require Cargo" />
-
-        <Button
-            android:id="@+id/button2"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/button3"
-            android:layout_centerHorizontal="true"
-            android:onClick="driveCargo"
-            android:text="Drive Cargo" />
-    </RelativeLayout>
-
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
