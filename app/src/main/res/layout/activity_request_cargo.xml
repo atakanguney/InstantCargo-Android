@@ -6,64 +6,66 @@
     android:layout_height="match_parent"
     tools:context="getirhacktathon.getirandroid.activity.RequestCargo">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/location_title_label"
-            android:layout_width="match_parent"
-            android:layout_height="28dp"
-            android:text="Location Title"
-            android:textAppearance="@android:style/TextAppearance.Material.Small" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/source_label"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/location_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Title"
-                android:textAppearance="@android:style/TextAppearance.Large" />
-
-            <ImageButton
-                android:id="@+id/search_button"
-                android:layout_width="wrap_content"
-                android:layout_height="46dp"
-                android:scaleType="centerInside"
-                android:layout_weight="1"
-                android:onClick="searchPlace"
-                app:srcCompat="@drawable/ic_search_black_24dp" />
-
-        </LinearLayout>
+            android:layout_centerHorizontal="true"
+            android:text="Source ID"
+            android:layout_marginTop="20dp"
+            android:textAppearance="@android:style/TextAppearance.Small" />
 
         <TextView
-            android:id="@+id/location_lat_long_label"
-            android:layout_width="match_parent"
-            android:layout_height="28dp"
-            android:text="Location Lat Long"
-            android:textAppearance="@android:style/TextAppearance.Material.Small" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/source_id"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/source_label"
+            android:layout_marginTop="10dp"
+            android:textAppearance="@android:style/TextAppearance.Large" />
 
-            <TextView
-                android:id="@+id/location_lat_long"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Lat Long"
-                android:textAppearance="@android:style/TextAppearance.Large" />
+        <TextView
+            android:id="@+id/dest_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/source_id"
+            android:layout_marginTop="10dp"
+            android:text="Destination Id"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            />
+        <TextView
+            android:id="@+id/dest_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/dest_label"
+            android:layout_marginTop="10dp"
+            android:textAppearance="@android:style/TextAppearance.Large" />
 
-        </LinearLayout>
+        <Button
+            android:id="@+id/route_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dest_id"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:onClick="searchPlace"
+            android:text="Find Points" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/request_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/dest_label"
+            android:layout_alignStart="@+id/dest_label"
+            android:layout_below="@+id/route_button"
+            android:onClick="makeRequest"
+            android:text="Request" />
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

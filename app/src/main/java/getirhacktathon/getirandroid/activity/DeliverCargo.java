@@ -1,6 +1,9 @@
 package getirhacktathon.getirandroid.activity;
 
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,37 +12,35 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.List;
-
 import getirhacktathon.getirandroid.R;
-import getirhacktathon.getirandroid.model.Location;
-import getirhacktathon.getirandroid.model.Request;
-import getirhacktathon.getirandroid.rest.ApiClient;
-import getirhacktathon.getirandroid.rest.ApiInterface;
 import getirhacktathon.getirandroid.util.Constants;
 import getirhacktathon.getirandroid.util.Utils;
-import retrofit2.Call;
 
 public class DeliverCargo extends AppCompatActivity {
 
     private String request_id;
-    private LatLng request_loc_inf;
+    private String request_source_id;
+    private LatLng request_source_loc_inf;
+
+    private String request_dest_id;
+    private LatLng request_dest_loc_inf;
 
     private EditText mEditText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deliver_cargo);
-
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (requestCode == Constants.GET_REQUEST) {
-                request_id = data.getStringExtra(Constants.search_location_name);
-                request_loc_inf = data.getParcelableExtra(Constants.search_lat_long);
+                request_id = data.getStringExtra(Constants.request);
+                request_source_loc_inf = data.getParcelableExtra(Constants.source_lat_long);
+                request_dest_loc_inf = data.getParcelableExtra(Constants.destination_lat_long);
 
 
                 TextView textView = findViewById(R.id.cargo_place);
@@ -68,13 +69,14 @@ public class DeliverCargo extends AppCompatActivity {
     }
 
     public void applyCargo(View view) {
-        if (request_id == null) {
+        if (request_dest_loc_inf == null) {
             Utils.showToast(this, "Cargo must be selected before continue!!");
             return;
         } else {
-
-
-
+            Intent in = new Intent(this, MapsActivity.class);
+            in.putExtra("SOURCE", request_source_loc_inf);
+            in.putExtra("DESTINATION", request_dest_loc_inf);
+            startActivity(in);
         }
     }
 }

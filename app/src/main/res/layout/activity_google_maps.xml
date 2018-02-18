@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/white"
         android:elevation="4dp"
-        android:layout_weight="1"
+        android:layout_weight="0.25"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -22,7 +22,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8"
+        android:layout_weight="8.75"
         tools:context=".home.GoogleMapsActivity" />
 
     <Button

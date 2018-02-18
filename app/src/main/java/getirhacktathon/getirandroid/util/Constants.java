@@ -18,5 +18,7 @@ public class Constants {
     public static final String search_lat_long = "SEARCH_LAT_LONG";
 
     public static final String request = "REQUEST";
+    public static final float LOCATION_REFRESH_DISTANCE = 500;
+    public static final long LOCATION_REFRESH_TIME = 5000;
 
 }

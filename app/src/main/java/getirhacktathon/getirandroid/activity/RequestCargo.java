@@ -1,10 +1,12 @@
 package getirhacktathon.getirandroid.activity;
 
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -27,6 +29,9 @@ import retrofit2.Response;
 public class RequestCargo extends AppCompatActivity {
     private static final String TAG = "abc";
 
+    private Source source;
+    private Destination destination;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,10 +47,10 @@ public class RequestCargo extends AppCompatActivity {
                 LatLng source_location_info = data.getParcelableExtra(Constants.source_lat_long);
 
                 List<Double> source_coordinates = new ArrayList<Double>();
-                source_coordinates.add(Utils.round(source_location_info.latitude, 4));
                 source_coordinates.add(Utils.round(source_location_info.longitude, 4));
+                source_coordinates.add(Utils.round(source_location_info.latitude, 4));
 
-                Source source = new Source();
+                source = new Source();
                 source.setCoordinates(source_coordinates);
                 source.setType("Point");
 
@@ -53,38 +58,18 @@ public class RequestCargo extends AppCompatActivity {
                 LatLng destination_location_info = data.getParcelableExtra(Constants.destination_lat_long);
 
                 List<Double> dest_coordinates = new ArrayList<Double>();
-                dest_coordinates.add(Utils.round(destination_location_info.latitude, 3));
                 dest_coordinates.add(Utils.round(destination_location_info.longitude, 3));
+                dest_coordinates.add(Utils.round(destination_location_info.latitude, 3));
 
-                Destination destination = new Destination();
+                destination = new Destination();
                 destination.setCoordinates(dest_coordinates);
                 destination.setType("Point");
 
-                Request request = new Request();
-                request.setSource(source);
-                request.setDestination(destination);
+                TextView sourceId = findViewById(R.id.source_id);
+                sourceId.setText(source_location_title);
 
-                ApiInterface apiService =
-                        ApiClient.getClient().create(ApiInterface.class);
-
-                Call<Request> call = apiService.createRequest(request);
-                Log.d(TAG, Utils.bodyToString(call.request()));
-
-                call.enqueue(new Callback<Request>() {
-                    @Override
-                    public void onResponse(Call<Request> call, Response<Request> response) {
-                        Log.d(TAG, response.code() + "");
-                        Log.d(TAG, response.toString());
-                        Request requests = response.body();
-                        Log.d(TAG, "Number of movies received: " + response.body());
-                    }
-
-                    @Override
-                    public void onFailure(Call<Request> call, Throwable t) {
-                        // Log error here since request failed
-                        Log.e(TAG, t.toString());
-                    }
-                });
+                TextView destId = findViewById(R.id.dest_id);
+                destId.setText(destination_location_title);
 
             }
         }
@@ -95,5 +80,45 @@ public class RequestCargo extends AppCompatActivity {
         startActivityForResult(showMap, Constants.SOURCE_DEST_LOC);
 
 
+    }
+
+    public void makeRequest(View view) {
+
+        Request request = new Request();
+        request.setSource(source);
+        request.setDestination(destination);
+
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+
+        Call<Request> call = apiService.createRequest(request);
+        Log.d(TAG, Utils.bodyToString(call.request()));
+
+        call.enqueue(new Callback<Request>() {
+            @Override
+            public void onResponse(Call<Request> call, Response<Request> response) {
+                Log.d(TAG, response.code() + "");
+                Log.d(TAG, response.toString());
+                Request requests = response.body();
+                if (response.code() == 200 || response.code() == 201) {
+                    Utils.showToast(getBaseContext(), "Request Added Successfully");
+                } else {
+                    try {
+                        Utils.showToast(getBaseContext(), response.errorBody().string());
+                    } catch (Exception e) {
+                        Log.d("Exception", e.getMessage());
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Request> call, Throwable t) {
+                // Log error here since request failed
+                Log.e(TAG, t.toString());
+            }
+        });
+
+        finish();
     }
 }

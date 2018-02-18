@@ -60,6 +60,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -112,7 +113,7 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
     private Intent resultData;
     private boolean getRequest;
-    private List<Location> requestsAll;
+    private HashMap<String, Request> requests;
     private int range;
 
     @Override
@@ -135,14 +136,13 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
             if (intent.hasExtra("GET_REQUEST")) {
                 getRequest = intent.getBooleanExtra("GET_REQUEST", false);
-                requestsAll = new ArrayList<Location>();
+                requests = new HashMap<String, Request>();
                 range = intent.getIntExtra("RANGE", -1);
             }
 
         } catch (Exception e) {
             // Do nothing
         }
-
         mGeoCoder = new Geocoder(this);
         resultData = new Intent();
 
@@ -374,7 +374,7 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
                             mLastKnownLocation = task.getResult();
                             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), 1));
+                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -412,8 +412,8 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
                             mGoogleMap.addCircle(circleOptions);
 
                             getirhacktathon.getirandroid.model.Location location = new getirhacktathon.getirandroid.model.Location();
-                            location.setLatitude(Utils.round(mLastKnownLocation.getLongitude(), 3));
-                            location.setLongitude(Utils.round(mLastKnownLocation.getLatitude(), 3));
+                            location.setLatitude(Utils.round(mLastKnownLocation.getLatitude(), 3));
+                            location.setLongitude(Utils.round(mLastKnownLocation.getLongitude(), 3));
                             location.setDistance(range);
 
                             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
@@ -425,21 +425,27 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
                                 @Override
                                 public void onResponse(Call<List<Request>> call, Response<List<Request>> response) {
 
-                                    List<Request> requests = response.body();
-                                    mGoogleMap.clear();
+                                    List<Request> requestsAll = response.body();
 
-                                    for (Request req : requests) {
+                                    if (response.code() == 200 || response.code() == 201) {
+                                        Utils.showToast(getBaseContext(), "Request Added Successfully");
+                                    } else {
+                                        try {
+                                            Utils.showToast(getBaseContext(), response.errorBody().string());
+                                        } catch (Exception e) {
+                                            Log.d("Exception", e.getMessage());
+                                        }
+
+                                    }
+                                    if (requestsAll == null) return;
+
+                                    for (Request req : requestsAll) {
                                         Log.d("abc", req.getDestination().getCoordinates().get(0) + ", " + req.getDestination().getCoordinates().get(1));
-
+                                        requests.put(req.getId(), req);
                                         mGoogleMap.addMarker(new MarkerOptions()
                                                 .title(req.getId())
-                                                .position(new LatLng(req.getDestination().getCoordinates().get(0),req.getDestination().getCoordinates().get(1)))
+                                                .position(new LatLng(req.getDestination().getCoordinates().get(1), req.getDestination().getCoordinates().get(0)))
                                                 .snippet(getString(R.string.default_info_snippet)));
-                                        //Address address = new Address(Locale.getDefault());
-                                        //address.setLatitude(req.getDestination().getCoordinates().get(0));
-                                        //address.setLongitude(req.getDestination().getCoordinates().get(1));
-
-                                        //addMarker(address);
                                     }
                                 }
 
@@ -631,8 +637,16 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
 
         if (getRequest) {
             builder.setPositiveButton("OK", (DialogInterface dialog, int which) -> {
-                resultData.putExtra(Constants.search_location_name, marker.getTitle());
-                resultData.putExtra(Constants.search_lat_long, marker.getPosition());
+
+                resultData.putExtra(Constants.request, marker.getTitle());
+
+                LatLng source = new LatLng(requests.get(marker.getTitle()).getSource().getCoordinates().get(1), requests.get(marker.getTitle()).getSource().getCoordinates().get(0));
+                LatLng destination = new LatLng(requests.get(marker.getTitle()).getDestination().getCoordinates().get(1), requests.get(marker.getTitle()).getDestination().getCoordinates().get(0));
+
+                resultData.putExtra(Constants.source_lat_long, source);
+                resultData.putExtra(Constants.destination_lat_long, destination);
+
+                setResult(RESULT_OK, resultData);
                 finish();
             });
 

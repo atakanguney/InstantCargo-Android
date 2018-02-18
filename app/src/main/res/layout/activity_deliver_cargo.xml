@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/search_cargo_button"
             android:layout_centerInParent="true"
-            android:text="Cargo Name"
+            android:text="Cargo ID"
             android:textAppearance="@android:style/TextAppearance.Large" />
 
         <Button
@@ -31,8 +31,9 @@
             android:id="@+id/apply_cargo_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:layout_below="@+id/search_cargo_button"
+            android:layout_centerInParent="true"
+            android:onClick="applyCargo"
             android:text="Apply" />
 
         <EditText
@@ -42,8 +43,8 @@
             android:layout_above="@+id/cargo_place"
             android:layout_centerInParent="true"
             android:ems="10"
-            android:inputType="numberDecimal"
-            tools:text="Enter Range" />
+            android:hint="Enter Range"
+            android:inputType="numberDecimal" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
