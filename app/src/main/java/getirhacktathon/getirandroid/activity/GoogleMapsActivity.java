@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -27,8 +28,15 @@ import android.widget.TextView;
 
 import getirhacktathon.getirandroid.R;
 
+import getirhacktathon.getirandroid.model.Request;
 import getirhacktathon.getirandroid.remote.GoogleMapsLocationAsyncTask;
+import getirhacktathon.getirandroid.rest.ApiClient;
+import getirhacktathon.getirandroid.rest.ApiInterface;
+import getirhacktathon.getirandroid.util.Constants;
 import getirhacktathon.getirandroid.util.Utils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -40,7 +48,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,6 +59,7 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -99,6 +111,9 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private Intent resultData;
+    private boolean getRequest;
+    private List<Location> requestsAll;
+    private int range;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -114,6 +129,19 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+        Intent intent;
+        try {
+            intent = getIntent();
+
+            if (intent.hasExtra("GET_REQUEST")) {
+                getRequest = intent.getBooleanExtra("GET_REQUEST", false);
+                requestsAll = new ArrayList<Location>();
+                range = intent.getIntExtra("RANGE", -1);
+            }
+
+        } catch (Exception e) {
+            // Do nothing
+        }
 
         mGeoCoder = new Geocoder(this);
         resultData = new Intent();
@@ -226,8 +254,6 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
             Utils.showToast(this, getString(R.string.unable_get_location));
         } else {
             // show all the markers on the map
-
-            mGoogleMap.clear();
             for (Address address : resultList) {
                 addMarker(address);
             }
@@ -306,23 +332,27 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
-        //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(39, 35), 4.5f));
+        if (getRequest) {
+            findNearbyRequests();
+        }
 
         // show information about location
         mGoogleMap.setOnMarkerClickListener((Marker marker) -> {
             showMarkerInformation(marker);
-            return false;
+            return true;
         });
 
         // add a marker when map is clicked and show information
-        mGoogleMap.setOnMapClickListener((LatLng latLng) -> {
-            Address address = new Address(Locale.getDefault());
-            address.setLatitude(latLng.latitude);
-            address.setLongitude(latLng.longitude);
+        if (!getRequest) {
+            mGoogleMap.setOnMapClickListener((LatLng latLng) -> {
+                Address address = new Address(Locale.getDefault());
+                address.setLatitude(latLng.latitude);
+                address.setLongitude(latLng.longitude);
 
-            Marker newMarker = addMarker(address);
-            showMarkerInformation(newMarker);
-        });
+                Marker newMarker = addMarker(address);
+                showMarkerInformation(newMarker);
+            });
+        }
     }
 
     /**
@@ -344,7 +374,82 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
                             mLastKnownLocation = task.getResult();
                             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                            mLastKnownLocation.getLongitude()), 1));
+
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            mGoogleMap.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+                            mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void findNearbyRequests() {
+
+        try {
+            if (mLocationPermissionGranted) {
+                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            mLastKnownLocation = task.getResult();
+
+                            CircleOptions circleOptions = new CircleOptions();
+                            circleOptions.center(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
+                            circleOptions.radius(range);
+                            circleOptions.fillColor(Color.parseColor("#500084d3"));
+                            circleOptions.strokeColor(Color.BLUE);
+                            circleOptions.strokeWidth(2);
+                            mGoogleMap.addCircle(circleOptions);
+
+                            getirhacktathon.getirandroid.model.Location location = new getirhacktathon.getirandroid.model.Location();
+                            location.setLatitude(Utils.round(mLastKnownLocation.getLongitude(), 3));
+                            location.setLongitude(Utils.round(mLastKnownLocation.getLatitude(), 3));
+                            location.setDistance(range);
+
+                            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+                            Call<List<Request>> call = apiService.getRequest(location);
+
+                            Log.d("abc", Utils.bodyToString(call.request()));
+
+                            call.enqueue(new Callback<List<Request>>() {
+                                @Override
+                                public void onResponse(Call<List<Request>> call, Response<List<Request>> response) {
+
+                                    List<Request> requests = response.body();
+                                    mGoogleMap.clear();
+
+                                    for (Request req : requests) {
+                                        Log.d("abc", req.getDestination().getCoordinates().get(0) + ", " + req.getDestination().getCoordinates().get(1));
+
+                                        mGoogleMap.addMarker(new MarkerOptions()
+                                                .title(req.getId())
+                                                .position(new LatLng(req.getDestination().getCoordinates().get(0),req.getDestination().getCoordinates().get(1)))
+                                                .snippet(getString(R.string.default_info_snippet)));
+                                        //Address address = new Address(Locale.getDefault());
+                                        //address.setLatitude(req.getDestination().getCoordinates().get(0));
+                                        //address.setLongitude(req.getDestination().getCoordinates().get(1));
+
+                                        //addMarker(address);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<List<Request>> call, Throwable t) {
+                                    // Log error here since request failed
+                                    Log.e(TAG, t.toString());
+                                }
+                            });
+
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
@@ -520,89 +625,105 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
      * @param marker Marker object that contains LatLang and name about its location.
      */
     private void showMarkerInformation(Marker marker) {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(marker.getTitle());
-        builder.setMessage(marker.getSnippet());
-        builder.setPositiveButton("Destination", (DialogInterface dialog, int which) -> {
-            if (!resultData.hasExtra("SOURCE_LOCATION_NAME") && !resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
-                resultData.putExtra("DESTINATION_LOCATION_NAME", marker.getTitle());
-                resultData.putExtra("DESTINATION_LAT_LONG", marker.getPosition());
-            } else if (!resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
-                if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Destination cannot be source!!");
-                } else {
-                    resultData.putExtra("DESTINATION_LOCATION_NAME", marker.getTitle());
-                    resultData.putExtra("DESTINATION_LAT_LONG", marker.getPosition());
-                }
-            } else if (!resultData.hasExtra("SOURCE_LOCATION_NAME")) {
-                if (!resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Only one destination can be selected!!");
-                    marker.remove();
-                }
-            } else {
-                if (!resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle()) && !resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Only one destination can be selected!!");
-                    marker.remove();
-                } else if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Destination cannot be source!!");
-                }
-            }
-        });
-        builder.setNeutralButton("Source", (DialogInterface dialog, int which) -> {
-            if (!resultData.hasExtra("SOURCE_LOCATION_NAME") && !resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
-                resultData.putExtra("SOURCE_LOCATION_NAME", marker.getTitle());
-                resultData.putExtra("SOURCE_LAT_LONG", marker.getPosition());
-            } else if (!resultData.hasExtra("SOURCE_LOCATION_NAME")) {
-                if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Source cannot be destination!!");
-                } else {
-                    resultData.putExtra("SOURCE_LOCATION_NAME", marker.getTitle());
-                    resultData.putExtra("SOURCE_LAT_LONG", marker.getPosition());
-                }
-            } else if (!resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
-                if (!resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Only one source can be selected!!");
-                    marker.remove();
-                }
-            } else {
-                if (!resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle()) && !resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Only one source can be selected!!");
-                    marker.remove();
-                } else if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    Utils.showToast(this, "Source cannot be destination!!");
-                }
-            }
-        });
 
-        builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int which) -> {
-            if (resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
-                if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    resultData.removeExtra("DESTINATION_LOCATION_NAME");
-                    resultData.removeExtra("DESTINATION_LAT_LONG");
-                }
-            } else if (resultData.hasExtra("SOURCE_LOCATION_NAME")) {
-                if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    resultData.removeExtra("SOURCE_LOCATION_NAME");
-                    resultData.removeExtra("SOURCE_LAT_LONG");
-                }
-            }
-            marker.remove();
-            return;
-        });
+        if (getRequest) {
+            builder.setPositiveButton("OK", (DialogInterface dialog, int which) -> {
+                resultData.putExtra(Constants.search_location_name, marker.getTitle());
+                resultData.putExtra(Constants.search_lat_long, marker.getPosition());
+                finish();
+            });
 
-        builder.setOnCancelListener((DialogInterface dialog) -> {
-            if (resultData.hasExtra("DESTINATION_LOCATION_NAME")) {
-                if (resultData.getStringExtra("DESTINATION_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    return;
+            builder.setNegativeButton("Cancel", (DialogInterface dialog, int which) -> {
+                return;
+            });
+
+        } else {
+            builder.setPositiveButton("Destination", (DialogInterface dialog, int which) -> {
+                if (!resultData.hasExtra(Constants.source_location_name) && !resultData.hasExtra(Constants.destination_location_name)) {
+                    resultData.putExtra(Constants.destination_location_name, marker.getTitle());
+                    resultData.putExtra(Constants.destination_lat_long, marker.getPosition());
+                } else if (!resultData.hasExtra(Constants.destination_location_name)) {
+                    if (resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Destination cannot be source!!");
+                    } else {
+                        resultData.putExtra(Constants.destination_location_name, marker.getTitle());
+                        resultData.putExtra(Constants.destination_lat_long, marker.getPosition());
+                    }
+                } else if (!resultData.hasExtra(Constants.source_location_name)) {
+                    if (!resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Only one destination can be selected!!");
+                        marker.remove();
+                    }
+                } else {
+                    if (!resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle()) && !resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Only one destination can be selected!!");
+                        marker.remove();
+                    } else if (resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Destination cannot be source!!");
+                    }
                 }
-            } else if (resultData.hasExtra("SOURCE_LOCATION_NAME")) {
-                if (resultData.getStringExtra("SOURCE_LOCATION_NAME").contentEquals(marker.getTitle())) {
-                    return;
+            });
+            builder.setNeutralButton("Source", (DialogInterface dialog, int which) -> {
+                if (!resultData.hasExtra(Constants.source_location_name) && !resultData.hasExtra(Constants.destination_location_name)) {
+                    resultData.putExtra(Constants.source_location_name, marker.getTitle());
+                    resultData.putExtra(Constants.source_lat_long, marker.getPosition());
+                } else if (!resultData.hasExtra(Constants.source_location_name)) {
+                    if (resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Source cannot be destination!!");
+                    } else {
+                        resultData.putExtra(Constants.source_location_name, marker.getTitle());
+                        resultData.putExtra(Constants.source_lat_long, marker.getPosition());
+                    }
+                } else if (!resultData.hasExtra(Constants.destination_location_name)) {
+                    if (!resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Only one source can be selected!!");
+                        marker.remove();
+                    }
+                } else {
+                    if (!resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle()) && !resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Only one source can be selected!!");
+                        marker.remove();
+                    } else if (resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        Utils.showToast(this, "Source cannot be destination!!");
+                    }
                 }
-            }
-            marker.remove();
-            return;
-        });
+            });
+
+            builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int which) -> {
+                if (resultData.hasExtra(Constants.destination_location_name)) {
+                    if (resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        resultData.removeExtra(Constants.destination_location_name);
+                        resultData.removeExtra(Constants.destination_lat_long);
+                    }
+                } else if (resultData.hasExtra(Constants.source_location_name)) {
+                    if (resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle())) {
+                        resultData.removeExtra(Constants.source_location_name);
+                        resultData.removeExtra(Constants.source_lat_long);
+                    }
+                }
+                marker.remove();
+                return;
+            });
+
+            builder.setOnCancelListener((DialogInterface dialog) -> {
+                if (resultData.hasExtra(Constants.destination_location_name)) {
+                    if (resultData.getStringExtra(Constants.destination_location_name).contentEquals(marker.getTitle())) {
+                        return;
+                    }
+                }
+
+                if (resultData.hasExtra(Constants.source_location_name)) {
+                    if (resultData.getStringExtra(Constants.source_location_name).contentEquals(marker.getTitle())) {
+                        return;
+                    }
+                }
+                marker.remove();
+                return;
+            });
+        }
         builder.create().show();
     }
 
@@ -626,7 +747,7 @@ public class GoogleMapsActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     public void makeRequest(View view) {
-        if (!resultData.hasExtra("DESTINATION_LOCATION_NAME") || !resultData.hasExtra("SOURCE_LOCATION_NAME")) {
+        if (!resultData.hasExtra(Constants.destination_location_name) || !resultData.hasExtra(Constants.source_location_name)) {
             Utils.showToast(this, "Destination and Source Must be selected!!");
         } else {
             setResult(RESULT_OK, resultData);

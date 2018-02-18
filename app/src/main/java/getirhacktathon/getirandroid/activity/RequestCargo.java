@@ -5,31 +5,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import getirhacktathon.getirandroid.R;
 import getirhacktathon.getirandroid.model.Destination;
-import getirhacktathon.getirandroid.model.Location;
 import getirhacktathon.getirandroid.model.Request;
-import getirhacktathon.getirandroid.model.RequestResponse;
 import getirhacktathon.getirandroid.model.Source;
 import getirhacktathon.getirandroid.rest.ApiClient;
 import getirhacktathon.getirandroid.rest.ApiInterface;
 import getirhacktathon.getirandroid.util.Utils;
+import getirhacktathon.getirandroid.util.Constants;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RequestCargo extends AppCompatActivity {
     private static final String TAG = "abc";
-    public static final int LOCATION = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +37,9 @@ public class RequestCargo extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode == LOCATION) {
-                String source_location_title = data.getStringExtra("SOURCE_LOCATION_NAME");
-                LatLng source_location_info = data.getParcelableExtra("SOURCE_LAT_LONG");
+            if (requestCode == Constants.SOURCE_DEST_LOC) {
+                String source_location_title = data.getStringExtra(Constants.source_location_name);
+                LatLng source_location_info = data.getParcelableExtra(Constants.source_lat_long);
 
                 List<Double> source_coordinates = new ArrayList<Double>();
                 source_coordinates.add(Utils.round(source_location_info.latitude, 4));
@@ -53,8 +49,8 @@ public class RequestCargo extends AppCompatActivity {
                 source.setCoordinates(source_coordinates);
                 source.setType("Point");
 
-                String destination_location_title = data.getStringExtra("DESTINATION_LOCATION_NAME");
-                LatLng destination_location_info = data.getParcelableExtra("DESTINATION_LAT_LONG");
+                String destination_location_title = data.getStringExtra(Constants.destination_location_name);
+                LatLng destination_location_info = data.getParcelableExtra(Constants.destination_lat_long);
 
                 List<Double> dest_coordinates = new ArrayList<Double>();
                 dest_coordinates.add(Utils.round(destination_location_info.latitude, 3));
@@ -96,7 +92,7 @@ public class RequestCargo extends AppCompatActivity {
 
     public void searchPlace(View view) {
         Intent showMap = new Intent(this, GoogleMapsActivity.class);
-        startActivityForResult(showMap, LOCATION);
+        startActivityForResult(showMap, Constants.SOURCE_DEST_LOC);
 
 
     }

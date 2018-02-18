@@ -1,51 +1,19 @@
 package getirhacktathon.getirandroid.model;
 
-/**
- * Created by atakan1 on 17.02.2018.
- */
-
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Location {
-    @SerializedName("location_name")
-    private String locationName;
 
     @SerializedName("longitude")
+    @Expose
     private double longitude;
-
     @SerializedName("latitude")
+    @Expose
     private double latitude;
-
     @SerializedName("distance")
+    @Expose
     private double distance;
-
-    public Location() {
-
-    }
-
-    public Location(String locationName, double longitude, double latitude, double distance) {
-        this.locationName = locationName;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.distance = distance;
-    }
-
-    public double getDistance() {
-
-        return distance;
-    }
-
-    public void setDistance(double distance) {
-        this.distance = distance;
-    }
-
-    public String getLocationName() {
-        return locationName;
-    }
-
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
-    }
 
     public double getLongitude() {
         return longitude;
@@ -62,4 +30,13 @@ public class Location {
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
 }

@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void driveCargo(View view) {
-        Intent driveCargoIntent = new Intent(this, DriveCargo.class);
+        Intent driveCargoIntent = new Intent(this, DeliverCargo.class);
         startActivity(driveCargoIntent);
     }
 

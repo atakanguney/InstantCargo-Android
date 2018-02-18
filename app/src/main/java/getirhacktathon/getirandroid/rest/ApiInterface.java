@@ -4,11 +4,8 @@ import java.util.List;
 
 import getirhacktathon.getirandroid.model.Location;
 import getirhacktathon.getirandroid.model.Request;
-import getirhacktathon.getirandroid.model.RequestResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -23,5 +20,8 @@ public interface ApiInterface {
 
     @POST("/request/create")
     Call<Request> createRequest(@Body Request request);
+
+    @POST("/deliver/accept/")
+    Call<Request> acceptRequest(@Query("id") String requestId);
 
 }

@@ -22,13 +22,13 @@
             android:text="Request Cargo" />
 
         <Button
-            android:id="@+id/driveButton"
+            android:id="@+id/deliverButton"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:onClick="driveCargo"
-            android:text="Drive Cargo" />
+            android:text="Deliver Cargo" />
 
         <Button
             android:id="@+id/searchButton"

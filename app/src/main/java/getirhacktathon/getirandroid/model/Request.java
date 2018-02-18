@@ -5,6 +5,17 @@ import com.google.gson.annotations.SerializedName;
 
 public class Request {
 
+    @SerializedName("_id")
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @SerializedName("source")
     @Expose
     private Source source;

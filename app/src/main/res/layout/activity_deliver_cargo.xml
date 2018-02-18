@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="getirhacktathon.getirandroid.activity.DeliverCargo">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/cargo_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/search_cargo_button"
+            android:layout_centerInParent="true"
+            android:text="Cargo Name"
+            android:textAppearance="@android:style/TextAppearance.Large" />
+
+        <Button
+            android:id="@+id/search_cargo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:onClick="searchCargo"
+            android:text="Search Cargo" />
+
+        <Button
+            android:id="@+id/apply_cargo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_below="@+id/search_cargo_button"
+            android:text="Apply" />
+
+        <EditText
+            android:id="@+id/range_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/cargo_place"
+            android:layout_centerInParent="true"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            tools:text="Enter Range" />
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
